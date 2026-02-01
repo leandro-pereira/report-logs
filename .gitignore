@@ -42,12 +42,15 @@ temp/
 # Compilação TypeScript
 *.tsbuildinfo
 
-# Dependências lock (opcional - descomentar se rodar como lib)
-# package-lock.json
-# yarn.lock
+# Dependências lock
+package-lock.json
+yarn.lock
 
 # Arquivos do sistema
 .DS_Store
+
+# Credenciais e arquivos sensíveis
+.api-keys.json
 Thumbs.db
 Desktop.ini
 
