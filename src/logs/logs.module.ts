@@ -19,7 +19,7 @@ export interface LogsModuleConfig {
   exports: [LogsService],
 })
 export class LogsModule {
-  static register(config: LogsModuleConfig): DynamicModule {
+  static forRoot(config: LogsModuleConfig): DynamicModule {
     const logClientProvider = {
       provide: LogClient,
       useValue: new LogClient(config.apiUrl, config.projectName),
