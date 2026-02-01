@@ -1,4 +1,8 @@
 import { Module, DynamicModule, Global } from '@nestjs/common';
+import { LogsService } from './logs.service';
+import { LogsController } from './logs.controller';
+import { FirebaseModule } from '../firebase/firebase.module';
+import { EmailModule } from '../email/email.module';
 import { LogClient } from '../common/log-client';
 
 export interface LogsModuleConfig {
@@ -8,7 +12,12 @@ export interface LogsModuleConfig {
 }
 
 @Global()
-@Module({})
+@Module({
+  imports: [FirebaseModule, EmailModule],
+  controllers: [LogsController],
+  providers: [LogsService],
+  exports: [LogsService],
+})
 export class LogsModule {
   static register(config: LogsModuleConfig): DynamicModule {
     const logClientProvider = {
@@ -19,8 +28,10 @@ export class LogsModule {
     return {
       module: LogsModule,
       global: true,
-      providers: [logClientProvider],
-      exports: [LogClient],
+      imports: [FirebaseModule, EmailModule],
+      controllers: [LogsController],
+      providers: [LogsService, logClientProvider],
+      exports: [LogsService, LogClient],
     };
   }
 }

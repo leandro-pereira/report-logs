@@ -2,7 +2,7 @@
   "name": "report-logs",
   "version": "1.0.0",
   "description": "Centralized Logging Service - Agregue logs de múltiplos projetos em um único lugar",
-  "author": "Your Name",
+  "author": "Leandro Pereira <leandro.pereira2011@hotmail.com>",
   "license": "MIT",
   "private": false,
   "main": "dist/index.js",
@@ -10,7 +10,7 @@
   "files": ["dist", "README.md", "LICENSE"],
   "repository": {
     "type": "git",
-    "url": "https://github.com/seu-usuario/report-logs.git"
+    "url": "https://github.com/leandro-pereira/report-logs.git"
   },
   "keywords": [
     "logging",
