@@ -1,13 +1,26 @@
-import { Module } from '@nestjs/common';
-import { LogsService } from './logs.service';
-import { LogsController } from './logs.controller';
-import { FirebaseModule } from '../firebase/firebase.module';
-import { EmailModule } from '../email/email.module';
+import { Module, DynamicModule, Global } from '@nestjs/common';
+import { LogClient } from '../common/log-client';
 
-@Module({
-  imports: [FirebaseModule, EmailModule],
-  controllers: [LogsController],
-  providers: [LogsService],
-  exports: [LogsService],
-})
-export class LogsModule {}
+export interface LogsModuleConfig {
+  apiUrl: string;
+  projectName: string;
+  ambient: 'development' | 'staging' | 'production';
+}
+
+@Global()
+@Module({})
+export class LogsModule {
+  static register(config: LogsModuleConfig): DynamicModule {
+    const logClientProvider = {
+      provide: LogClient,
+      useValue: new LogClient(config.apiUrl, config.projectName),
+    };
+
+    return {
+      module: LogsModule,
+      global: true,
+      providers: [logClientProvider],
+      exports: [LogClient],
+    };
+  }
+}
