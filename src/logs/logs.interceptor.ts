@@ -30,49 +30,71 @@ export class LogsInterceptor implements NestInterceptor {
 
     // Gerar requestId único para essa requisição
     const requestId = uuidv4();
-    
-    // Vincular o request ao contexto e inicializar
-    this.logContext.setRequest(request);
-    this.logContext.initializeContext(requestId);
 
-    // Anexar requestId ao request para fácil acesso
-    (request as any).requestId = requestId;
-    (request as any).logContext = this.logContext;
+    try {
+      // Verificar se LogContext está disponível
+      if (this.logContext) {
+        // Vincular o request ao contexto e inicializar
+        this.logContext.setRequest(request);
+        this.logContext.initializeContext(requestId);
 
-    // Registrar início da requisição
-    const startTime = Date.now();
-    const method = request.method;
-    const path = request.path;
-    const userAgent = request.get('user-agent');
+        // Anexar requestId ao request para fácil acesso
+        (request as any).requestId = requestId;
+        (request as any).logContext = this.logContext;
 
-    // Log de início
-    this.logContext.debug(`Iniciando ${method} ${path}`, 'HttpRequest', {
-      userAgent,
-    });
+        // Registrar início da requisição
+        const startTime = Date.now();
+        const method = request.method;
+        const path = request.path;
+        const userAgent = request.get('user-agent');
 
-    return next.handle().pipe(
-      tap((data) => {
-        // Requisição bem-sucedida
-        this.handleSuccessResponse(
-          request,
-          response,
-          requestId,
-          startTime,
-          data,
+        // Log de início
+        this.logContext.debug(`Iniciando ${method} ${path}`, 'HttpRequest', {
+          userAgent,
+        });
+
+        return next.handle().pipe(
+          tap((data) => {
+            // Requisição bem-sucedida
+            this.handleSuccessResponse(
+              request,
+              response,
+              requestId,
+              startTime,
+              data,
+            );
+          }),
+          catchError((error) => {
+            // Erro durante a requisição
+            this.handleErrorResponse(
+              request,
+              response,
+              requestId,
+              startTime,
+              error,
+            );
+            throw error;
+          }),
         );
-      }),
-      catchError((error) => {
-        // Erro durante a requisição
-        this.handleErrorResponse(
-          request,
-          response,
-          requestId,
-          startTime,
-          error,
-        );
-        throw error;
-      }),
-    );
+      } else {
+        // LogContext não está disponível - continuar sem logging
+        console.warn('⚠️ LogContext não inicializado - continuando sem logs estruturados');
+        
+        // Ainda anexar requestId básico
+        (request as any).requestId = requestId;
+        
+        return next.handle();
+      }
+    } catch (error: any) {
+      // Se qualquer erro acontecer no setup do logging, não quebrar a request
+      console.error('❌ Erro no setup do LogsInterceptor:', error?.message ?? 'Erro desconhecido');
+      
+      // Anexar requestId básico
+      (request as any).requestId = requestId;
+      
+      // Continuar sem logging
+      return next.handle();
+    }
   }
 
   /**
@@ -85,45 +107,54 @@ export class LogsInterceptor implements NestInterceptor {
     startTime: number,
     data: any,
   ) {
-    const duration = Date.now() - startTime;
-    const statusCode = response.statusCode || 200;
-    const method = request.method;
-    const path = request.path;
-    const userAgent = request.get('user-agent');
-    const authenticatedBy = request.user?.id || request.get('authorization');
+    try {
+      const duration = Date.now() - startTime;
+      const statusCode = response.statusCode || 200;
+      const method = request.method;
+      const path = request.path;
+      const userAgent = request.get('user-agent');
+      const authenticatedBy = request.user?.id || request.get('authorization');
 
-    // Registrar conclusão
-    this.logContext.debug(`Finalizando ${method} ${path} com status ${statusCode}`, 'HttpRequest', {
-      duration,
-      statusCode,
-    });
+      // Registrar conclusão apenas se LogContext estiver disponível
+      if (this.logContext) {
+        this.logContext.debug(`Finalizando ${method} ${path} com status ${statusCode}`, 'HttpRequest', {
+          duration,
+          statusCode,
+        });
 
-    // Coletar todos os logs registrados durante a execução
-    const collectedLogs = this.logContext.getLogs();
+        // Coletar todos os logs registrados durante a execução
+        const collectedLogs = this.logContext.getLogs();
 
-    // Enviar para o serviço de logs
-    await this.logClient.sendLog({
-      requestId,
-      message: `${method} ${path} - ${statusCode}`,
-      level: statusCode >= 400 ? 'WARN' : 'INFO',
-      context: 'HttpRequest',
-      path,
-      method,
-      statusCode,
-      userAgent,
-      authenticatedBy,
-      responseTime: duration,
-      metadata: {
-        request: {
-          body: request.body,
-          query: request.query,
-          params: request.params,
-        },
-        collectedLogs,
-      },
-    });
+        // Enviar para o serviço de logs se LogClient estiver disponível
+        if (this.logClient) {
+          await this.logClient.sendLog({
+            requestId,
+            message: `${method} ${path} - ${statusCode}`,
+            level: statusCode >= 400 ? 'WARN' : 'INFO',
+            context: 'HttpRequest',
+            path,
+            method,
+            statusCode,
+            userAgent,
+            authenticatedBy,
+            responseTime: duration,
+            metadata: {
+              request: {
+                body: request.body,
+                query: request.query,
+                params: request.params,
+              },
+              collectedLogs,
+            },
+          });
+        }
 
-    this.logContext.clear();
+        this.logContext.clear();
+      }
+    } catch (error : any) {
+      console.error('❌ Erro ao processar logs de sucesso:', error?.message ?? 'Erro desconhecido');
+      // Não interromper o fluxo por erro de logging
+    }
   }
 
   /**
@@ -136,52 +167,61 @@ export class LogsInterceptor implements NestInterceptor {
     startTime: number,
     error: any,
   ) {
-    const duration = Date.now() - startTime;
-    const statusCode = error.status || response.statusCode || 500;
-    const method = request.method;
-    const path = request.path;
-    const userAgent = request.get('user-agent');
-    const authenticatedBy = request.user?.id || request.get('authorization');
-    const errorMessage = error.message || 'Erro desconhecido';
+    try {
+      const duration = Date.now() - startTime;
+      const statusCode = error.status || response.statusCode || 500;
+      const method = request.method;
+      const path = request.path;
+      const userAgent = request.get('user-agent');
+      const authenticatedBy = request.user?.id || request.get('authorization');
+      const errorMessage = error.message || 'Erro desconhecido';
 
-    // Registrar erro
-    this.logContext.error(`Erro em ${method} ${path}`, 'HttpRequest', {
-      error: errorMessage,
-      statusCode,
-    });
+      // Registrar erro apenas se LogContext estiver disponível
+      if (this.logContext) {
+        this.logContext.error(`Erro em ${method} ${path}`, 'HttpRequest', {
+          error: errorMessage,
+          statusCode,
+        });
 
-    // Coletar todos os logs registrados durante a execução
-    const collectedLogs = this.logContext.getLogs();
+        // Coletar todos os logs registrados durante a execução
+        const collectedLogs = this.logContext.getLogs();
 
-    // Enviar para o serviço de logs
-    await this.logClient.sendLog({
-      requestId,
-      message: `${method} ${path} - ${statusCode} - ${errorMessage}`,
-      level: 'ERROR',
-      context: 'HttpRequest',
-      path,
-      method,
-      statusCode,
-      userAgent,
-      authenticatedBy,
-      responseTime: duration,
-      errorMessage,
-      stack: error.stack,
-      metadata: {
-        request: {
-          body: request.body,
-          query: request.query,
-          params: request.params,
-        },
-        error: {
-          message: error.message,
-          name: error.name,
-          statusCode: error.status,
-        },
-        collectedLogs,
-      },
-    });
+        // Enviar para o serviço de logs se LogClient estiver disponível
+        if (this.logClient) {
+          await this.logClient.sendLog({
+            requestId,
+            message: `${method} ${path} - ${statusCode} - ${errorMessage}`,
+            level: 'ERROR',
+            context: 'HttpRequest',
+            path,
+            method,
+            statusCode,
+            userAgent,
+            authenticatedBy,
+            responseTime: duration,
+            errorMessage,
+            stack: error.stack,
+            metadata: {
+              request: {
+                body: request.body,
+                query: request.query,
+                params: request.params,
+              },
+              error: {
+                message: error.message,
+                name: error.name,
+                statusCode: error.status,
+              },
+              collectedLogs,
+            },
+          });
+        }
 
-    this.logContext.clear();
+        this.logContext.clear();
+      }
+    } catch (loggingError: any) {
+      console.error('❌ Erro ao processar logs de erro:', loggingError?.message ?? 'Erro desconhecido');
+      // Não interromper o fluxo por erro de logging
+    }
   }
 }
