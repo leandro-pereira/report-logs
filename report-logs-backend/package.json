@@ -1,9 +1,10 @@
 {
   "name": "report-logs",
-  "version": "1.0.0",
-  "description": "Centralized Logging Service - Agregue logs de múltiplos projetos em um único lugar",
-  "author": "Leandro Pereira <leandro.pereira2011@hotmail.com>",
-  "license": "MIT",
+  "version": "0.0.1",
+  "description": "",
+  "author": "",
+  "private": true,
+  "license": "UNLICENSED",
   "keywords": [
     "logging",
     "firestore",
@@ -68,7 +69,7 @@
     "typescript": "^5.7.3",
     "typescript-eslint": "^8.20.0"
   },
-  "jest": {
+ "jest": {
     "moduleFileExtensions": [
       "js",
       "json",

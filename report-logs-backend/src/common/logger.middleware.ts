@@ -15,6 +15,10 @@ export class LoggerMiddleware implements NestMiddleware {
     const { method, originalUrl, body } = req;
     const startTime = Date.now();
 
+    // Capturar referências para usar dentro do closure
+    const logClient = this.logClient;
+    const logger = this.logger;
+
     // Capturar resposta original
     const originalSend = res.send;
 
@@ -25,25 +29,25 @@ export class LoggerMiddleware implements NestMiddleware {
       // Log de request/response
       if (statusCode >= 400) {
         // Log de erro
-        this.logClient
+        logClient
           .error(
             `${method} ${originalUrl} - Status ${statusCode}`,
             undefined,
             'HttpRequest',
           )
-          .catch((err) => this.logger.error('Erro ao registrar log:', err));
+          .catch((err) => logger.error('Erro ao registrar log:', err));
       } else if (statusCode >= 300) {
         // Log de aviso
-        this.logClient
+        logClient
           .warn(
             `${method} ${originalUrl} - Status ${statusCode}`,
             'HttpRequest',
           )
-          .catch((err) => this.logger.error('Erro ao registrar log:', err));
+          .catch((err) => logger.error('Erro ao registrar log:', err));
       }
 
       // Log de sucesso (opcional - pode gerar muitos logs)
-      // this.logClient.info(`${method} ${originalUrl} - ${statusCode} (${duration}ms)`);
+      // logClient.info(`${method} ${originalUrl} - ${statusCode} (${duration}ms)`);
 
       return originalSend.call(this, data);
     };
