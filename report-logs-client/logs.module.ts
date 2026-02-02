@@ -1,8 +1,8 @@
 import { Global, Module } from '@nestjs/common';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { LogClient } from './log-client';
-import { LogContext } from './log-context';
-import { LogsInterceptor } from './logs.interceptor';
+import { LogContext } from './src/logs/log-context';
+import { LogsInterceptor } from './src/logs/logs.interceptor';
 
 @Global()
 @Module({
