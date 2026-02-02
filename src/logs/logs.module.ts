@@ -28,15 +28,10 @@ import { Logger } from './logger';
         return logClient;
       },
     },
-    {
-      provide: APP_INTERCEPTOR,
-      useFactory: (logClient: LogClient, logContext: LogContext) => {
-        return new LogsInterceptor(logClient, logContext);
-      },
-      inject: [LogClient, LogContext],
-    },
+    // Interceptor removido do registro automático - precisa ser registrado manualmente
+    LogsInterceptor,
   ],
-  exports: [LogClient, LogContext],
+  exports: [LogClient, LogContext, LogsInterceptor],
 })
 export class LogsModule {
   /**
@@ -89,15 +84,10 @@ export class LogsModule {
             return logClient;
           },
         },
-        {
-          provide: APP_INTERCEPTOR,
-          useFactory: (logClient: LogClient, logContext: LogContext) => {
-            return new LogsInterceptor(logClient, logContext);
-          },
-          inject: [LogClient, LogContext],
-        },
+        // Interceptor disponível para registro manual
+        LogsInterceptor,
       ],
-      exports: [LogClient, LogContext],
+      exports: [LogClient, LogContext, LogsInterceptor],
     };
   }
 }
