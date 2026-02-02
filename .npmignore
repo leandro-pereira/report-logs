@@ -1,5 +1,15 @@
 .DS_Store
 node_modules/
-dist/
 *.log
 .env
+src/
+tsconfig.json
+nest-cli.json
+.prettierrc
+eslint.config.mjs
+index.ts
+logs.module.ts
+SETUP.md
+USAGE.md
+ESTRUTURA-FINAL.md
+report-logs-backend/
