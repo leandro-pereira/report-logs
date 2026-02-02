@@ -45,7 +45,7 @@ export interface LogClientConfig {
     ambient: Environment;
     timeout?: number;
 }
-export interface LogContext {
+export interface LogContextData {
     requestId: string;
     userId?: string;
     sessionId?: string;

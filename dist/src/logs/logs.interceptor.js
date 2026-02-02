@@ -64,6 +64,7 @@ let LogsInterceptor = (() => {
             const response = context.switchToHttp().getResponse();
             // Gerar requestId único para essa requisição
             const requestId = (0, uuid_1.v4)();
+            // Inicializar contexto
             this.logContext.initializeContext(requestId);
             // Anexar requestId ao request para fácil acesso
             request.requestId = requestId;
@@ -73,7 +74,7 @@ let LogsInterceptor = (() => {
             const method = request.method;
             const path = request.path;
             const userAgent = request.get('user-agent');
-            // Log de início (opcional)
+            // Log de início
             this.logContext.debug(`Iniciando ${method} ${path}`, 'HttpRequest', {
                 userAgent,
             });

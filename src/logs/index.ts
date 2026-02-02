@@ -7,6 +7,7 @@ export { LogClient } from './log-client';
 export { LogsModule } from './logs.module';
 export { LogsMiddleware } from './logs.middleware';
 export { LogsInterceptor } from './logs.interceptor';
+export { LogContext } from './log-context';
 export { BaseService } from './base.service';
 export { ExampleLoggingService } from './example-logging.service';
 export { Logger } from './logger';
@@ -17,13 +18,12 @@ export type {
   LogsModuleConfig,
   LogResponse,
   LogClientConfig,
-  LogContext,
   LoggerOptions,
   LogLevel,
   Environment,
 } from './types';
 
-export type { LogContext as LogContextData, RequestLog } from './log-context';
+export type { LogContextData, RequestLog } from './log-context';
 
 // Constantes
 export {

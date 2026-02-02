@@ -7,5 +7,4 @@ export { LogsInterceptor } from './logs/logs.interceptor';
 export { LogContext } from './logs/log-context';
 
 // Export types
-export type { LogPayload } from './logs/index';
-export type { LogsModuleConfig } from './logs/types';
+export type { LogPayload, LogsModuleConfig, LogContextData, RequestLog } from './logs/index';

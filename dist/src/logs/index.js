@@ -3,7 +3,7 @@
  * Exporte todos os arquivos do módulo de logs
  */
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ERROR_MESSAGES = exports.CORRELATION_ID_HEADER = exports.TRACE_ID_HEADER = exports.REQUEST_ID_HEADER = exports.LOG_CONTEXT_KEY = exports.DEFAULT_HEADERS = exports.HTTP_METHODS = exports.ENVIRONMENTS = exports.LOG_LEVELS = exports.DEFAULT_BATCH_TIMEOUT = exports.DEFAULT_BATCH_SIZE = exports.DEFAULT_RETRY_DELAY = exports.DEFAULT_RETRY_ATTEMPTS = exports.DEFAULT_LOG_TIMEOUT = exports.Logger = exports.ExampleLoggingService = exports.BaseService = exports.LogsInterceptor = exports.LogsMiddleware = exports.LogsModule = exports.LogClient = void 0;
+exports.ERROR_MESSAGES = exports.CORRELATION_ID_HEADER = exports.TRACE_ID_HEADER = exports.REQUEST_ID_HEADER = exports.LOG_CONTEXT_KEY = exports.DEFAULT_HEADERS = exports.HTTP_METHODS = exports.ENVIRONMENTS = exports.LOG_LEVELS = exports.DEFAULT_BATCH_TIMEOUT = exports.DEFAULT_BATCH_SIZE = exports.DEFAULT_RETRY_DELAY = exports.DEFAULT_RETRY_ATTEMPTS = exports.DEFAULT_LOG_TIMEOUT = exports.Logger = exports.ExampleLoggingService = exports.BaseService = exports.LogContext = exports.LogsInterceptor = exports.LogsMiddleware = exports.LogsModule = exports.LogClient = void 0;
 // Classes
 var log_client_1 = require("./log-client");
 Object.defineProperty(exports, "LogClient", { enumerable: true, get: function () { return log_client_1.LogClient; } });
@@ -13,6 +13,8 @@ var logs_middleware_1 = require("./logs.middleware");
 Object.defineProperty(exports, "LogsMiddleware", { enumerable: true, get: function () { return logs_middleware_1.LogsMiddleware; } });
 var logs_interceptor_1 = require("./logs.interceptor");
 Object.defineProperty(exports, "LogsInterceptor", { enumerable: true, get: function () { return logs_interceptor_1.LogsInterceptor; } });
+var log_context_1 = require("./log-context");
+Object.defineProperty(exports, "LogContext", { enumerable: true, get: function () { return log_context_1.LogContext; } });
 var base_service_1 = require("./base.service");
 Object.defineProperty(exports, "BaseService", { enumerable: true, get: function () { return base_service_1.BaseService; } });
 var example_logging_service_1 = require("./example-logging.service");

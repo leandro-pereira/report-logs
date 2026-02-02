@@ -20,8 +20,8 @@ import { LogContext } from './log-context';
 @Injectable()
 export class LogsInterceptor implements NestInterceptor {
   constructor(
-    private logClient: LogClient,
-    private logContext: LogContext,
+    private readonly logClient: LogClient,
+    private readonly logContext: LogContext,
   ) {}
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
@@ -30,6 +30,8 @@ export class LogsInterceptor implements NestInterceptor {
 
     // Gerar requestId único para essa requisição
     const requestId = uuidv4();
+    
+    // Inicializar contexto
     this.logContext.initializeContext(requestId);
 
     // Anexar requestId ao request para fácil acesso
@@ -42,7 +44,7 @@ export class LogsInterceptor implements NestInterceptor {
     const path = request.path;
     const userAgent = request.get('user-agent');
 
-    // Log de início (opcional)
+    // Log de início
     this.logContext.debug(`Iniciando ${method} ${path}`, 'HttpRequest', {
       userAgent,
     });

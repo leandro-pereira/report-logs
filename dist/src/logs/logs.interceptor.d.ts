@@ -10,8 +10,8 @@ import { LogContext } from './log-context';
  * 4. Envia tudo para o serviço de logs ao final
  */
 export declare class LogsInterceptor implements NestInterceptor {
-    private logClient;
-    private logContext;
+    private readonly logClient;
+    private readonly logContext;
     constructor(logClient: LogClient, logContext: LogContext);
     intercept(context: ExecutionContext, next: CallHandler): Observable<any>;
     /**
