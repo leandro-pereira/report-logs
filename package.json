@@ -4,20 +4,19 @@
   "description": "Client library for EverTrips Report Logs - NestJS module for centralized logging",
   "author": "Leandro Pereira",
   "license": "MIT",
-  "main": "./report-logs-client/dist/src/index.js",
-  "types": "./report-logs-client/dist/src/index.d.ts",
+  "main": "dist/src/index.js",
+  "types": "dist/src/index.d.ts",
   "files": [
-    "report-logs-client/dist",
-    "report-logs-client/package.json",
-    "report-logs-client/README.md"
+    "dist"
   ],
   "scripts": {
-    "build": "cd report-logs-client && npm run build",
-    "build:watch": "cd report-logs-client && npm run build:watch",
-    "test": "cd report-logs-client && npm test",
-    "test:watch": "cd report-logs-client && npm test:watch",
-    "lint": "cd report-logs-client && npm run lint",
-    "format": "cd report-logs-client && npm run format",
+    "build": "tsc",
+    "build:watch": "tsc --watch",
+    "start": "node dist/src/index.js",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "lint": "eslint . --ext .ts",
+    "format": "prettier --write \"src/**/*.ts\"",
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
@@ -29,8 +28,10 @@
   "devDependencies": {
     "@nestjs/cli": "^11.0.0",
     "@nestjs/testing": "^11.0.0",
+    "@types/express": "^5.0.6",
     "@types/jest": "^29.5.0",
     "@types/node": "^20.0.0",
+    "@types/uuid": "^10.0.0",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
     "eslint": "^8.0.0",
@@ -50,7 +51,6 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/leandro-pereira/report-logs.git",
-    "directory": "report-logs-client"
+    "url": "https://github.com/leandro-pereira/report-logs.git"
   }
 }
