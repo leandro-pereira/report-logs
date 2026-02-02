@@ -14,7 +14,7 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.LogContext = exports.LogsInterceptor = exports.LogsMiddleware = exports.LogClient = exports.LogsModule = void 0;
+exports.LogsProviderFactory = exports.LogContext = exports.LogsInterceptor = exports.LogsMiddleware = exports.LogClient = exports.LogsModule = void 0;
 // Main export for the Report Logs Client library
 __exportStar(require("./logs/index"), exports);
 var logs_module_1 = require("./logs/logs.module");
@@ -27,4 +27,6 @@ var logs_interceptor_1 = require("./logs/logs.interceptor");
 Object.defineProperty(exports, "LogsInterceptor", { enumerable: true, get: function () { return logs_interceptor_1.LogsInterceptor; } });
 var log_context_1 = require("./logs/log-context");
 Object.defineProperty(exports, "LogContext", { enumerable: true, get: function () { return log_context_1.LogContext; } });
+var logs_provider_factory_1 = require("./logs/logs.provider-factory");
+Object.defineProperty(exports, "LogsProviderFactory", { enumerable: true, get: function () { return logs_provider_factory_1.LogsProviderFactory; } });
 //# sourceMappingURL=index.js.map
