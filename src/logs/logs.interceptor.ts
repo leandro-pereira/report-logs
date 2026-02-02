@@ -31,7 +31,8 @@ export class LogsInterceptor implements NestInterceptor {
     // Gerar requestId único para essa requisição
     const requestId = uuidv4();
     
-    // Inicializar contexto
+    // Vincular o request ao contexto e inicializar
+    this.logContext.setRequest(request);
     this.logContext.initializeContext(requestId);
 
     // Anexar requestId ao request para fácil acesso

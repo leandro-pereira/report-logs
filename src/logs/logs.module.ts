@@ -30,7 +30,10 @@ import { Logger } from './logger';
     },
     {
       provide: APP_INTERCEPTOR,
-      useClass: LogsInterceptor,
+      useFactory: (logClient: LogClient, logContext: LogContext) => {
+        return new LogsInterceptor(logClient, logContext);
+      },
+      inject: [LogClient, LogContext],
     },
   ],
   exports: [LogClient, LogContext],
@@ -88,7 +91,10 @@ export class LogsModule {
         },
         {
           provide: APP_INTERCEPTOR,
-          useClass: LogsInterceptor,
+          useFactory: (logClient: LogClient, logContext: LogContext) => {
+            return new LogsInterceptor(logClient, logContext);
+          },
+          inject: [LogClient, LogContext],
         },
       ],
       exports: [LogClient, LogContext],
