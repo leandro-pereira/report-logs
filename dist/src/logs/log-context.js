@@ -73,12 +73,23 @@ let LogContext = (() => {
         /**
          * Inicializa o contexto para uma nova requisição
          */
-        initializeContext(requestId) {
+        initializeContext(requestId, request) {
             const id = requestId || (0, uuid_1.v4)();
-            this.contextData = {
-                requestId: id,
-                logs: [],
-            };
+            if (request) {
+                // Se temos o request, usar ele diretamente
+                request.__logContext = {
+                    requestId: id,
+                    logs: [],
+                };
+                this.contextData = request.__logContext;
+            }
+            else {
+                // Fallback para instância local
+                this.contextData = {
+                    requestId: id,
+                    logs: [],
+                };
+            }
             return id;
         }
         /**

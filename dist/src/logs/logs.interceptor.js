@@ -69,7 +69,7 @@ let LogsInterceptor = (() => {
                 if (this.logContext) {
                     // Vincular o request ao contexto e inicializar
                     this.logContext.setRequest(request);
-                    this.logContext.initializeContext(requestId);
+                    this.logContext.initializeContext(requestId, request);
                     // Anexar requestId ao request para fácil acesso
                     request.requestId = requestId;
                     request.logContext = this.logContext;

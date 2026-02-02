@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.LogsProviderFactory = void 0;
+const common_1 = require("@nestjs/common");
 const core_1 = require("@nestjs/core");
 const log_client_1 = require("./log-client");
 const log_context_1 = require("./log-context");
@@ -31,13 +32,12 @@ class LogsProviderFactory {
         const logContextProvider = {
             provide: log_context_1.LogContext,
             useClass: log_context_1.LogContext,
+            scope: common_1.Scope.TRANSIENT, // Cria nova instância para cada injeção
         };
         const interceptorProvider = {
             provide: core_1.APP_INTERCEPTOR,
-            useFactory: (logClient, logContext) => {
-                return new logs_interceptor_1.LogsInterceptor(logClient, logContext);
-            },
-            inject: [log_client_1.LogClient, log_context_1.LogContext],
+            useClass: logs_interceptor_1.LogsInterceptor,
+            scope: common_1.Scope.TRANSIENT, // Importante para que cada request tenha seu próprio interceptor
         };
         return [logClientProvider, logContextProvider, interceptorProvider];
     }
@@ -57,6 +57,7 @@ class LogsProviderFactory {
         const logContextProvider = {
             provide: log_context_1.LogContext,
             useClass: log_context_1.LogContext,
+            scope: common_1.Scope.TRANSIENT, // Nova instância para cada injeção
         };
         return [logClientProvider, logContextProvider, logs_interceptor_1.LogsInterceptor];
     }

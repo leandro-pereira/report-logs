@@ -22,7 +22,7 @@ export declare class LogContext {
     /**
      * Inicializa o contexto para uma nova requisição
      */
-    initializeContext(requestId?: string): string;
+    initializeContext(requestId?: string, request?: any): string;
     /**
      * Obtém o requestId da requisição atual
      */

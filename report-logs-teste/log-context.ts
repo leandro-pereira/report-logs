@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { AsyncLocalStorage } from 'async_hooks';
 import { v4 as uuidv4 } from 'uuid';
 
 export interface RequestLog {
@@ -16,49 +17,22 @@ export interface LogContextData {
 
 /**
  * Serviço para gerenciar contexto de logs por request
- * Versão simplificada compatível com NestJS v9
+ * Usa AsyncLocalStorage para manter contexto isolado por requisição
  */
 @Injectable()
 export class LogContext {
-  private contextData: LogContextData = {
-    requestId: '',
-    logs: [],
-  };
-
-  /**
-   * Define qual request este contexto está vinculado
-   */
-  setRequest(request: any): void {
-    // Armazenar contexto diretamente no request object
-    if (!request.__logContext) {
-      request.__logContext = {
-        requestId: uuidv4(),
-        logs: [],
-      };
-    }
-    this.contextData = request.__logContext;
-  }
+  private storage = new AsyncLocalStorage<LogContextData>();
 
   /**
    * Inicializa o contexto para uma nova requisição
    */
-  initializeContext(requestId?: string, request?: any): string {
+  initializeContext(requestId?: string): string {
     const id = requestId || uuidv4();
     
-    if (request) {
-      // Se temos o request, usar ele diretamente
-      request.__logContext = {
-        requestId: id,
-        logs: [],
-      };
-      this.contextData = request.__logContext;
-    } else {
-      // Fallback para instância local
-      this.contextData = {
-        requestId: id,
-        logs: [],
-      };
-    }
+    this.storage.enterWith({
+      requestId: id,
+      logs: [],
+    });
 
     return id;
   }
@@ -67,19 +41,20 @@ export class LogContext {
    * Obtém o requestId da requisição atual
    */
   getRequestId(): string | undefined {
-    return this.contextData?.requestId;
+    return this.storage.getStore()?.requestId;
   }
 
   /**
    * Registra um log no contexto da requisição
    */
   addLog(level: 'INFO' | 'WARN' | 'ERROR' | 'DEBUG', message: string, context?: string, data?: Record<string, any>): void {
-    if (!this.contextData) {
+    const store = this.storage.getStore();
+    if (!store) {
       console.warn('LogContext não inicializado');
       return;
     }
 
-    this.contextData.logs.push({
+    store.logs.push({
       timestamp: Date.now(),
       level,
       message,
@@ -120,24 +95,24 @@ export class LogContext {
    * Obtém todos os logs registrados na requisição atual
    */
   getLogs(): RequestLog[] {
-    return this.contextData?.logs || [];
+    const store = this.storage.getStore();
+    return store?.logs || [];
   }
 
   /**
    * Limpa o contexto (geralmente chamado ao final da requisição)
    */
   clear(): void {
-    if (this.contextData) {
-      this.contextData.logs = [];
+    const store = this.storage.getStore();
+    if (store) {
+      store.logs = [];
     }
   }
 
   /**
    * Executa uma função dentro do contexto de uma requisição
-   * @deprecated Use request-scoped injection instead
    */
   run<T>(requestId: string, fn: () => T): T {
-    // Para compatibilidade, mas não é necessário com request scope
-    return fn();
+    return this.storage.run({ requestId, logs: [] }, fn);
   }
 }

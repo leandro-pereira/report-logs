@@ -36,7 +36,7 @@ export class LogsInterceptor implements NestInterceptor {
       if (this.logContext) {
         // Vincular o request ao contexto e inicializar
         this.logContext.setRequest(request);
-        this.logContext.initializeContext(requestId);
+        this.logContext.initializeContext(requestId, request);
 
         // Anexar requestId ao request para fácil acesso
         (request as any).requestId = requestId;

@@ -1,4 +1,4 @@
-import { Provider } from '@nestjs/common';
+import { Provider, Scope } from '@nestjs/common';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { LogClient } from './log-client';
 import { LogContext } from './log-context';
@@ -39,14 +39,13 @@ export class LogsProviderFactory {
     const logContextProvider: Provider = {
       provide: LogContext,
       useClass: LogContext,
+      scope: Scope.TRANSIENT, // Cria nova instância para cada injeção
     };
 
     const interceptorProvider: Provider = {
       provide: APP_INTERCEPTOR,
-      useFactory: (logClient: LogClient, logContext: LogContext) => {
-        return new LogsInterceptor(logClient, logContext);
-      },
-      inject: [LogClient, LogContext],
+      useClass: LogsInterceptor,
+      scope: Scope.TRANSIENT, // Importante para que cada request tenha seu próprio interceptor
     };
 
     return [logClientProvider, logContextProvider, interceptorProvider];
@@ -75,6 +74,7 @@ export class LogsProviderFactory {
     const logContextProvider: Provider = {
       provide: LogContext,
       useClass: LogContext,
+      scope: Scope.TRANSIENT, // Nova instância para cada injeção
     };
 
     return [logClientProvider, logContextProvider, LogsInterceptor];
