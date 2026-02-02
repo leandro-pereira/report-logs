@@ -7,6 +7,7 @@ export { LogClient } from './log-client';
 export { LogsModule } from './logs.module';
 export { LogsMiddleware } from './logs.middleware';
 export { LogsInterceptor } from './logs.interceptor';
+export { StandaloneLogsInterceptor } from './standalone-logs.interceptor';
 export { LogContext } from './log-context';
 export { LogsProviderFactory } from './logs.provider-factory';
 export { BaseService } from './base.service';
