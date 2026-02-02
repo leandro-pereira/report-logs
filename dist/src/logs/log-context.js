@@ -40,11 +40,10 @@ var __setFunctionName = (this && this.__setFunctionName) || function (f, name, p
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.LogContext = void 0;
 const common_1 = require("@nestjs/common");
-const async_hooks_1 = require("async_hooks");
 const uuid_1 = require("uuid");
 /**
  * Serviço para gerenciar contexto de logs por request
- * Usa AsyncLocalStorage para manter contexto isolado por requisição
+ * Versão simplificada compatível com NestJS v9
  */
 let LogContext = (() => {
     let _classDecorators = [(0, common_1.Injectable)()];
@@ -53,35 +52,50 @@ let LogContext = (() => {
     let _classThis;
     var LogContext = _classThis = class {
         constructor() {
-            this.storage = new async_hooks_1.AsyncLocalStorage();
+            this.contextData = {
+                requestId: '',
+                logs: [],
+            };
+        }
+        /**
+         * Define qual request este contexto está vinculado
+         */
+        setRequest(request) {
+            // Armazenar contexto diretamente no request object
+            if (!request.__logContext) {
+                request.__logContext = {
+                    requestId: (0, uuid_1.v4)(),
+                    logs: [],
+                };
+            }
+            this.contextData = request.__logContext;
         }
         /**
          * Inicializa o contexto para uma nova requisição
          */
         initializeContext(requestId) {
             const id = requestId || (0, uuid_1.v4)();
-            this.storage.enterWith({
+            this.contextData = {
                 requestId: id,
                 logs: [],
-            });
+            };
             return id;
         }
         /**
          * Obtém o requestId da requisição atual
          */
         getRequestId() {
-            return this.storage.getStore()?.requestId;
+            return this.contextData?.requestId;
         }
         /**
          * Registra um log no contexto da requisição
          */
         addLog(level, message, context, data) {
-            const store = this.storage.getStore();
-            if (!store) {
+            if (!this.contextData) {
                 console.warn('LogContext não inicializado');
                 return;
             }
-            store.logs.push({
+            this.contextData.logs.push({
                 timestamp: Date.now(),
                 level,
                 message,
@@ -117,23 +131,23 @@ let LogContext = (() => {
          * Obtém todos os logs registrados na requisição atual
          */
         getLogs() {
-            const store = this.storage.getStore();
-            return store?.logs || [];
+            return this.contextData?.logs || [];
         }
         /**
          * Limpa o contexto (geralmente chamado ao final da requisição)
          */
         clear() {
-            const store = this.storage.getStore();
-            if (store) {
-                store.logs = [];
+            if (this.contextData) {
+                this.contextData.logs = [];
             }
         }
         /**
          * Executa uma função dentro do contexto de uma requisição
+         * @deprecated Use request-scoped injection instead
          */
         run(requestId, fn) {
-            return this.storage.run({ requestId, logs: [] }, fn);
+            // Para compatibilidade, mas não é necessário com request scope
+            return fn();
         }
     };
     __setFunctionName(_classThis, "LogContext");

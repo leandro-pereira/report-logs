@@ -40,7 +40,6 @@ var __setFunctionName = (this && this.__setFunctionName) || function (f, name, p
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.LogsModule = void 0;
 const common_1 = require("@nestjs/common");
-const core_1 = require("@nestjs/core");
 const log_client_1 = require("./log-client");
 const log_context_1 = require("./log-context");
 const logs_interceptor_1 = require("./logs.interceptor");
@@ -60,12 +59,10 @@ let LogsModule = (() => {
                         return logClient;
                     },
                 },
-                {
-                    provide: core_1.APP_INTERCEPTOR,
-                    useClass: logs_interceptor_1.LogsInterceptor,
-                },
+                // Interceptor removido do registro automático - precisa ser registrado manualmente
+                logs_interceptor_1.LogsInterceptor,
             ],
-            exports: [log_client_1.LogClient, log_context_1.LogContext],
+            exports: [log_client_1.LogClient, log_context_1.LogContext, logs_interceptor_1.LogsInterceptor],
         })];
     let _classDescriptor;
     let _classExtraInitializers = [];
@@ -114,12 +111,10 @@ let LogsModule = (() => {
                             return logClient;
                         },
                     },
-                    {
-                        provide: core_1.APP_INTERCEPTOR,
-                        useClass: logs_interceptor_1.LogsInterceptor,
-                    },
+                    // Interceptor disponível para registro manual
+                    logs_interceptor_1.LogsInterceptor,
                 ],
-                exports: [log_client_1.LogClient, log_context_1.LogContext],
+                exports: [log_client_1.LogClient, log_context_1.LogContext, logs_interceptor_1.LogsInterceptor],
             };
         }
     };

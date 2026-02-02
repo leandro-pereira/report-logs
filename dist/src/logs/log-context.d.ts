@@ -11,10 +11,14 @@ export interface LogContextData {
 }
 /**
  * Serviço para gerenciar contexto de logs por request
- * Usa AsyncLocalStorage para manter contexto isolado por requisição
+ * Versão simplificada compatível com NestJS v9
  */
 export declare class LogContext {
-    private storage;
+    private contextData;
+    /**
+     * Define qual request este contexto está vinculado
+     */
+    setRequest(request: any): void;
     /**
      * Inicializa o contexto para uma nova requisição
      */
@@ -53,6 +57,7 @@ export declare class LogContext {
     clear(): void;
     /**
      * Executa uma função dentro do contexto de uma requisição
+     * @deprecated Use request-scoped injection instead
      */
     run<T>(requestId: string, fn: () => T): T;
 }
