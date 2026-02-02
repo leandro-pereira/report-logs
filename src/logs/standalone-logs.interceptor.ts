@@ -46,12 +46,16 @@ export class StandaloneLogsInterceptor implements NestInterceptor {
   }
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+    console.log('🚀 StandaloneLogsInterceptor: Interceptando request...');
+    
     const request = context.switchToHttp().getRequest();
     const response = context.switchToHttp().getResponse();
 
     // Gerar requestId único
     const requestId = uuidv4();
     const startTime = Date.now();
+
+    console.log(`📋 Request ID gerado: ${requestId} para ${request.method} ${request.path}`);
 
     // Inicializar contexto diretamente no request
     const logContext: LogContextData = {
@@ -63,8 +67,11 @@ export class StandaloneLogsInterceptor implements NestInterceptor {
     (request as any).requestId = requestId;
     (request as any).logContext = logContext;
 
+    console.log(`💾 Contexto anexado ao request:`, { requestId, hasLogContext: !!(request as any).logContext });
+
     // Helper functions para logging
     const addLog = (level: 'INFO' | 'WARN' | 'ERROR' | 'DEBUG', message: string, context?: string, data?: any) => {
+      console.log(`📝 Adicionando log [${level}]: ${message}`);
       logContext.logs.push({
         timestamp: Date.now(),
         level,
@@ -75,23 +82,38 @@ export class StandaloneLogsInterceptor implements NestInterceptor {
     };
 
     // Anexar helpers ao request
-    (request as any).logInfo = (message: string, context?: string, data?: any) => addLog('INFO', message, context, data);
-    (request as any).logWarn = (message: string, context?: string, data?: any) => addLog('WARN', message, context, data);
-    (request as any).logError = (message: string, context?: string, data?: any) => addLog('ERROR', message, context, data);
-    (request as any).logDebug = (message: string, context?: string, data?: any) => addLog('DEBUG', message, context, data);
+    (request as any).logInfo = (message: string, context?: string, data?: any) => {
+      console.log(`ℹ️ logInfo chamado: ${message}`);
+      addLog('INFO', message, context, data);
+    };
+    (request as any).logWarn = (message: string, context?: string, data?: any) => {
+      console.log(`⚠️ logWarn chamado: ${message}`);
+      addLog('WARN', message, context, data);
+    };
+    (request as any).logError = (message: string, context?: string, data?: any) => {
+      console.log(`❌ logError chamado: ${message}`);
+      addLog('ERROR', message, context, data);
+    };
+    (request as any).logDebug = (message: string, context?: string, data?: any) => {
+      console.log(`🐛 logDebug chamado: ${message}`);
+      addLog('DEBUG', message, context, data);
+    };
 
     // Log inicial
     const method = request.method;
     const path = request.path;
     const userAgent = request.get('user-agent');
     
+    console.log(`🏁 Iniciando log para: ${method} ${path}`);
     addLog('DEBUG', `Iniciando ${method} ${path}`, 'HttpRequest', { userAgent });
 
     return next.handle().pipe(
       tap((data) => {
+        console.log(`✅ Request finalizada com sucesso: ${method} ${path}`);
         this.handleSuccess(request, response, requestId, startTime, logContext);
       }),
       catchError((error) => {
+        console.log(`❌ Request finalizada com erro: ${method} ${path} - ${error.message}`);
         this.handleError(request, response, requestId, startTime, error, logContext);
         throw error;
       }),
@@ -106,10 +128,15 @@ export class StandaloneLogsInterceptor implements NestInterceptor {
     logContext: LogContextData,
   ) {
     try {
+      console.log(`🎯 Processando sucesso para request ${requestId}`);
+      
       const duration = Date.now() - startTime;
       const statusCode = response.statusCode || 200;
       const method = request.method;
       const path = request.path;
+
+      console.log(`📊 Estatísticas: ${method} ${path} - ${statusCode} - ${duration}ms`);
+      console.log(`📋 Total de logs coletados: ${logContext.logs.length}`);
 
       logContext.logs.push({
         timestamp: Date.now(),
@@ -121,7 +148,10 @@ export class StandaloneLogsInterceptor implements NestInterceptor {
 
       // Enviar logs se configurado
       if (StandaloneLogsInterceptor.config) {
+        console.log(`📤 Enviando logs para: ${StandaloneLogsInterceptor.config.apiUrl}`);
         await this.sendLogs(requestId, method, path, statusCode, duration, request, logContext, null);
+      } else {
+        console.log(`⚠️ StandaloneLogsInterceptor não configurado - logs não enviados`);
       }
     } catch (error) {
       console.error('❌ Erro ao processar logs de sucesso:', error);

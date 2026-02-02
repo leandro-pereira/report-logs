@@ -60,11 +60,13 @@ let StandaloneLogsInterceptor = (() => {
             console.log(`✅ StandaloneLogsInterceptor configurado para ${config.projectName}`);
         }
         intercept(context, next) {
+            console.log('🚀 StandaloneLogsInterceptor: Interceptando request...');
             const request = context.switchToHttp().getRequest();
             const response = context.switchToHttp().getResponse();
             // Gerar requestId único
             const requestId = (0, uuid_1.v4)();
             const startTime = Date.now();
+            console.log(`📋 Request ID gerado: ${requestId} para ${request.method} ${request.path}`);
             // Inicializar contexto diretamente no request
             const logContext = {
                 requestId,
@@ -73,8 +75,10 @@ let StandaloneLogsInterceptor = (() => {
             // Anexar ao request
             request.requestId = requestId;
             request.logContext = logContext;
+            console.log(`💾 Contexto anexado ao request:`, { requestId, hasLogContext: !!request.logContext });
             // Helper functions para logging
             const addLog = (level, message, context, data) => {
+                console.log(`📝 Adicionando log [${level}]: ${message}`);
                 logContext.logs.push({
                     timestamp: Date.now(),
                     level,
@@ -84,28 +88,46 @@ let StandaloneLogsInterceptor = (() => {
                 });
             };
             // Anexar helpers ao request
-            request.logInfo = (message, context, data) => addLog('INFO', message, context, data);
-            request.logWarn = (message, context, data) => addLog('WARN', message, context, data);
-            request.logError = (message, context, data) => addLog('ERROR', message, context, data);
-            request.logDebug = (message, context, data) => addLog('DEBUG', message, context, data);
+            request.logInfo = (message, context, data) => {
+                console.log(`ℹ️ logInfo chamado: ${message}`);
+                addLog('INFO', message, context, data);
+            };
+            request.logWarn = (message, context, data) => {
+                console.log(`⚠️ logWarn chamado: ${message}`);
+                addLog('WARN', message, context, data);
+            };
+            request.logError = (message, context, data) => {
+                console.log(`❌ logError chamado: ${message}`);
+                addLog('ERROR', message, context, data);
+            };
+            request.logDebug = (message, context, data) => {
+                console.log(`🐛 logDebug chamado: ${message}`);
+                addLog('DEBUG', message, context, data);
+            };
             // Log inicial
             const method = request.method;
             const path = request.path;
             const userAgent = request.get('user-agent');
+            console.log(`🏁 Iniciando log para: ${method} ${path}`);
             addLog('DEBUG', `Iniciando ${method} ${path}`, 'HttpRequest', { userAgent });
             return next.handle().pipe((0, operators_1.tap)((data) => {
+                console.log(`✅ Request finalizada com sucesso: ${method} ${path}`);
                 this.handleSuccess(request, response, requestId, startTime, logContext);
             }), (0, operators_1.catchError)((error) => {
+                console.log(`❌ Request finalizada com erro: ${method} ${path} - ${error.message}`);
                 this.handleError(request, response, requestId, startTime, error, logContext);
                 throw error;
             }));
         }
         async handleSuccess(request, response, requestId, startTime, logContext) {
             try {
+                console.log(`🎯 Processando sucesso para request ${requestId}`);
                 const duration = Date.now() - startTime;
                 const statusCode = response.statusCode || 200;
                 const method = request.method;
                 const path = request.path;
+                console.log(`📊 Estatísticas: ${method} ${path} - ${statusCode} - ${duration}ms`);
+                console.log(`📋 Total de logs coletados: ${logContext.logs.length}`);
                 logContext.logs.push({
                     timestamp: Date.now(),
                     level: 'DEBUG',
@@ -115,7 +137,11 @@ let StandaloneLogsInterceptor = (() => {
                 });
                 // Enviar logs se configurado
                 if (StandaloneLogsInterceptor.config) {
+                    console.log(`📤 Enviando logs para: ${StandaloneLogsInterceptor.config.apiUrl}`);
                     await this.sendLogs(requestId, method, path, statusCode, duration, request, logContext, null);
+                }
+                else {
+                    console.log(`⚠️ StandaloneLogsInterceptor não configurado - logs não enviados`);
                 }
             }
             catch (error) {
