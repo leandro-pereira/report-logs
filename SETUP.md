@@ -61,6 +61,8 @@ LOGS_RETRY_ATTEMPTS=3
 LOGS_RETRY_DELAY=1000
 ```
 
+**Nota:** A chave de API é carregada automaticamente em memória quando o projeto inicia.
+
 ### 2. Importação no AppModule
 
 ```typescript

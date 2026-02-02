@@ -126,9 +126,6 @@ LOGS_API_URL=http://localhost:3001/logs
 
 # Ambiente
 NODE_ENV=development
-
-# Chave de API (se necessário)
-LOGS_API_KEY=sua-chave-aqui
 ```
 
 ## 📖 Documentação Completa

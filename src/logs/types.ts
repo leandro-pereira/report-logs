@@ -30,7 +30,6 @@ export interface LogsModuleConfig {
   apiUrl: string;
   projectName: string;
   ambient: Environment;
-  apiKey?: string;
   timeout?: number;
   retryAttempts?: number;
   retryDelay?: number;
@@ -49,7 +48,6 @@ export interface LogClientConfig {
   apiUrl: string;
   projectName: string;
   ambient: Environment;
-  apiKey?: string;
   timeout?: number;
 }
 
